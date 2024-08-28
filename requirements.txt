@@ -1,3 +1,4 @@
 Flask==2.2.5
 redis==5.0.0
 faker==18.9.0
+pytest
