@@ -1,4 +1,5 @@
 """reusable Redis adapter class"""
+
 import redis
 
 
@@ -56,7 +57,9 @@ class RedisAdapter:
                 self.redis_client.delete(*keys)
             return f"Deleted {len(keys)} keys."
         except redis.exceptions.ConnectionError:
-            return "Failed to connect to Redis. Please check your Redis server connection."
+            return (
+                "Failed to connect to Redis. Please check your Redis server connection."
+            )
         except redis.exceptions.TimeoutError:
             return "The request to Redis timed out. Please try again later."
         except redis.exceptions.ResponseError as e:
