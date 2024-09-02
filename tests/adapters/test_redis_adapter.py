@@ -8,7 +8,9 @@ class TestRedisAdapter(unittest.TestCase):
 
     def setUp(self):
         """setup"""
-        self.adapter = RedisAdapter(host="localhost", port=6379, db=0, password=None)
+        self.adapter = RedisAdapter(
+            host="localhost", port=6379, db=0, password=None, logger=None
+        )
         self.adapter.redis_client = MagicMock()
 
     @patch("lib.adapters.redis_adapter.redis.Redis")

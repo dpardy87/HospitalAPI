@@ -3,7 +3,6 @@
 import os
 import subprocess
 import json
-import logging
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash
 from adapters.redis_adapter import RedisAdapter
 from csv_to_redis_loader import CsvToRedisLoader
@@ -12,22 +11,20 @@ app = Flask(__name__, template_folder="../templates")
 app.secret_key = (
     "\xf8\x11)\x18\xc0\x0f\xa0\xd9\x1f\x10\xbcW12\xc2\xbf\t\x9b\xa6\\}\x90>"
 )
-redis_adapter = RedisAdapter(host="redis")
-log = logging.getLogger(__name__)
 
 
 # only use Redis when needed (for fetching data)
 def get_redis_connection():
     """return Redis adapter"""
-    return RedisAdapter(host="redis")
+    return RedisAdapter(host="redis", logger=app.logger)
 
 
 def load_csv_to_redis():
     """set up Loader class to handle redis import"""
     CsvToRedisLoader(
-        redis_adapter=RedisAdapter(host="redis"),
+        redis_adapter=get_redis_connection(),
         csv_file="/app/output/hospitals_and_procedures.csv",
-        log=log,
+        log=app.logger,
     )
 
 
@@ -62,8 +59,8 @@ def generate_csv():
 def manage_hospitals():
     """manage Redis data on frontend"""
     r = get_redis_connection()
-
     if request.method == "POST":
+        # delete, then reload
         r.delete_all_keys()
         load_csv_to_redis()
         return redirect(url_for("manage_hospitals"))

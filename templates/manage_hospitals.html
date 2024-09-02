@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Hospitals Data</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Manage Hospitals Data</h3>
+            </div>
+            <div class="card-body">
+                <p>Current number of hospital records in Redis: <strong>{{ hospital_count }}</strong></p>
+                
+                <form method="POST" action="{{ url_for('manage_hospitals') }}" class="mb-3">
+                    <button type="submit" class="btn btn-danger btn-block">Clear Redis and Reinsert</button>
+                </form>
+                
+                <form method="POST" action="{{ url_for('generate_csv') }}">
+                    <button type="submit" class="btn btn-primary btn-block">Generate Hospitals CSV</button>
+                </form>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="mt-4">
+                {% for message in messages %}
+                    <div class="alert alert-info alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.11/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

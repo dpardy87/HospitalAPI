@@ -1,19 +1,19 @@
-"""reusable Redis adapter class"""
+"""Redis adapter"""
 
 import redis
 
 
 class RedisAdapter:
-    """RedisAdapter"""
+    """redis adapter class"""
 
-    def __init__(self, host, port=6379, db=0, password=None):
+    def __init__(self, host, port=6379, db=0, password=None, logger=None):
         """set client attrs"""
         self.redis_client = redis.Redis(host=host, port=port, db=db, password=password)
+        self.logger = logger
 
     def get(self, *keys):
         """get values via key(s)"""
         try:
-
             if len(keys) == 1:
                 # if only one key, decode val and return
                 value = self.redis_client.get(keys[0])
@@ -22,7 +22,7 @@ class RedisAdapter:
             values = self.redis_client.mget(keys)
             return [value.decode("utf-8") if value else None for value in values]
         except redis.RedisError as e:
-            print(f"Redis get error: {e}")
+            self.logger.error("Redis get error: %s", str(e))
             return None if len(keys) == 1 else [None] * len(keys)
 
     def keys(self, pattern):
@@ -30,23 +30,21 @@ class RedisAdapter:
         try:
             # get keys matching pattern
             matching_keys = self.redis_client.keys(pattern)
-
             # mget to get the values
             values = self.redis_client.mget(matching_keys)
-
             # list comp
             return [value.decode("utf-8") if value else None for value in values]
         except redis.RedisError as e:
-            print(f"Redis keys error: {e}")
+            self.logger.error("Redis keys error: %s", str(e))
             return []
 
     def set(self, key, value, ex=None):
-        """set a value w optional expiration time"""
+        """Set a value with optional expiration time"""
         try:
             self.redis_client.set(key, value, ex=ex)
             return True
         except redis.RedisError as e:
-            print(f"Redis set error: {e}")
+            self.logger.error("Redis set error: %s", str(e))
             return False
 
     def delete_all_keys(self):
@@ -55,14 +53,6 @@ class RedisAdapter:
             keys = self.redis_client.keys("*")
             if keys:
                 self.redis_client.delete(*keys)
-            return f"Deleted {len(keys)} keys."
-        except redis.exceptions.ConnectionError:
-            return (
-                "Failed to connect to Redis. Please check your Redis server connection."
-            )
-        except redis.exceptions.TimeoutError:
-            return "The request to Redis timed out. Please try again later."
-        except redis.exceptions.ResponseError as e:
-            return f"Redis responded with an error: {str(e)}"
-        except redis.exceptions.RedisError as e:
-            return f"An unexpected Redis error occurred: {str(e)}"
+            self.logger.info(f"Deleted {len(keys)} keys.")
+        except Exception as e:
+            self.logger.error(f"An error occurred while deleting keys: {str(e)}")
